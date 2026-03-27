@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pings Sent On Time</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&amp;family=Questrial:wght@400&amp;display=swap" rel="stylesheet">
+  <style>
+    html, body { height: 100%; margin: 0; }
+    * { font-family: 'Questrial', sans-serif; }
+    .font-display { font-family: 'Lora', serif; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.8); opacity: 0.6; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .anim-fade-up { animation: fadeUp 0.6s ease-out both; }
+    .anim-delay-1 { animation-delay: 0.1s; }
+    .anim-delay-2 { animation-delay: 0.2s; }
+    .anim-delay-3 { animation-delay: 0.3s; }
+    .anim-delay-4 { animation-delay: 0.4s; }
+    .anim-delay-5 { animation-delay: 0.5s; }
+    .anim-delay-6 { animation-delay: 0.6s; }
+
+    .pulse-dot::before {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      animation: pulse-ring 2s ease-out infinite;
+    }
+
+    .screen-transition {
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .screen-hidden {
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+      position: absolute;
+      width: 100%;
+    }
+    .screen-visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .drag-item {
+      cursor: grab;
+      user-select: none;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    .drag-item:active { cursor: grabbing; }
+    .drag-item.dragging {
+      opacity: 0.5;
+      transform: scale(0.97);
+    }
+    .drag-item.drag-over {
+      border-top: 3px solid #f97316;
+    }
+
+    .option-btn {
+      transition: all 0.25s ease;
+      border: 2px solid transparent;
+    }
+    .option-btn:hover:not(.selected):not(.disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+    .option-btn.disabled { pointer-events: none; opacity: 0.6; }
+
+    .progress-fill {
+      transition: width 0.5s ease;
+      background: linear-gradient(90deg, #6378FD, #7c8bfe);
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite;
+    }
+
+    .confetti-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    .toast-msg {
+      animation: fadeUp 0.4s ease-out both;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full overflow-auto" style="background: #151821;"><!-- Progress Bar -->
+   <div class="fixed top-0 left-0 w-full z-50" style="height: 4px; background: rgba(255,255,255,0.08);">
+    <div id="progress-bar" class="h-full progress-fill" style="width: 0%;"></div>
+   </div><!-- Screen Container -->
+   <div id="screens" class="relative w-full min-h-full flex items-center justify-center p-4 sm:p-8" style="min-height: 100%;"><!-- SCREEN 1: INTRO -->
+    <div id="screen-1" class="screen-transition screen-visible w-full max-w-2xl mx-auto text-center">
+     <div class="anim-fade-up">
+      <div class="relative inline-flex items-center justify-center w-20 h-20 rounded-full mb-8" style="background: rgba(249,115,22,0.15);">
+       <div class="pulse-dot relative text-orange-400"><i data-lucide="message-circle" style="width:36px;height:36px;"></i>
+       </div>
+      </div>
+     </div>
+     <h1 id="intro-title" class="font-display text-4xl sm:text-5xl font-bold mb-4 anim-fade-up anim-delay-1" style="color: #f1f5f9;">Pings sent on time</h1>
+     <p id="intro-subtitle" class="text-lg sm:text-xl mb-4 anim-fade-up anim-delay-2" style="color: #6378FD;">The chat just ended. The client is still thinking about you.</p>
+     <p class="text-base mb-10 anim-fade-up anim-delay-3" style="color: #94a3b8; max-width: 480px; margin-left: auto; margin-right: auto;">This is your window — 24 hours to send one message that can bring them back. Let's make sure you know exactly how to use it.</p><button onclick="goToScreen(2)" class="anim-fade-up anim-delay-4 inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white font-semibold text-lg transition-all hover:scale-105" style="background: linear-gradient(135deg, #f97316, #ea580c);"> Let's start <i data-lucide="arrow-right" style="width:20px;height:20px;"></i> </button>
+    </div><!-- SCREEN 2: QUIZ -->
+    <div id="screen-2" class="screen-transition screen-hidden w-full max-w-2xl mx-auto">
+     <div class="text-center mb-8"><span class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style="background: rgba(99,120,253,0.15); color: #6378FD;">QUIZ · SCREEN 2 OF 6</span>
+      <h2 class="font-display text-3xl font-bold mb-2" style="color: #f1f5f9;">Before we practice — let's check the basics</h2>
+     </div>
+     <div id="quiz-container"></div>
+    </div><!-- SCREEN 3: SCENARIO -->
+    <div id="screen-3" class="screen-transition screen-hidden w-full max-w-2xl mx-auto">
+     <div class="text-center mb-6"><span class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style="background: rgba(99,120,253,0.15); color: #6378FD;">SCENARIO · SCREEN 3 OF 6</span>
+      <h2 class="font-display text-3xl font-bold mb-2" style="color: #f1f5f9;">A chat just ended. Now what?</h2>
+     </div>
+     <div class="rounded-2xl p-6 mb-6" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
+      <div class="flex items-start gap-3 mb-4">
+       <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(99,120,253,0.15);"><i data-lucide="book-open" style="width:18px;height:18px;color:#6378FD;"></i>
+       </div>
+       <p class="text-sm leading-relaxed" style="color: #cbd5e1;">You just finished a 35-minute chat with a client. She was emotional, talked about her relationship and an upcoming important date. It's been 3 hours since the chat ended. You're about to start your next shift.</p>
+      </div>
+      <p class="font-semibold text-base" style="color: #f1f5f9;">What do you do?</p>
+     </div>
+     <div id="scenario-options" class="space-y-3"></div>
+     <div id="scenario-feedback" class="hidden mt-4"></div>
+     <div id="scenario-next" class="hidden text-center mt-6"><button onclick="goToScreen(4)" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #6378FD, #5169e8);"> Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i> </button>
+     </div>
+    </div><!-- SCREEN 4: SORTING -->
+    <div id="screen-4" class="screen-transition screen-hidden w-full max-w-2xl mx-auto">
+     <div class="text-center mb-6"><span class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style="background: rgba(99,120,253,0.15); color: #6378FD;">BUILD IT · SCREEN 4 OF 6</span>
+      <h2 class="font-display text-3xl font-bold mb-2" style="color: #f1f5f9;">Put the ping together</h2>
+      <p class="text-sm" style="color: #94a3b8;">Drag these fragments into the correct order to build a strong ping.</p>
+     </div>
+     <div id="sort-container" class="space-y-2 mb-6"></div>
+     <div id="sort-feedback" class="hidden mb-4"></div>
+     <div class="text-center"><button id="check-sort-btn" onclick="checkSort()" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #6378FD, #5169e8);"> Check order <i data-lucide="check" style="width:18px;height:18px;"></i> </button> <button id="sort-next-btn" onclick="goToScreen(5)" class="hidden inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #6378FD, #5169e8);"> Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i> </button>
+     </div>
+    </div><!-- SCREEN 5: REVIEW -->
+    <div id="screen-5" class="screen-transition screen-hidden w-full max-w-2xl mx-auto">
+     <div class="text-center mb-6"><span class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style="background: rgba(99,120,253,0.15); color: #6378FD;">REVIEW · SCREEN 5 OF 6</span>
+      <h2 class="font-display text-3xl font-bold mb-3" style="color: #f1f5f9;">The anatomy of a great ping</h2>
+      <p class="text-sm mb-6" style="color: #94a3b8;">Remember this structure every time.</p>
+     </div>
+     <div class="rounded-2xl overflow-hidden mb-6" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
+      <div class="p-6 space-y-4">
+       <div class="flex items-start gap-4 anim-fade-up">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style="background: rgba(99,120,253,0.2); color: #6378FD;">
+         1
+        </div>
+        <div>
+         <p class="font-semibold text-sm" style="color: #6378FD;">Emotion</p>
+         <p class="text-sm" style="color: #cbd5e1;">Acknowledge what they're feeling. Make it personal.</p>
+        </div>
+       </div>
+       <div class="flex items-start gap-4 anim-fade-up anim-delay-1">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style="background: rgba(99,120,253,0.2); color: #6378FD;">
+         2
+        </div>
+        <div>
+         <p class="font-semibold text-sm" style="color: #6378FD;">Insight / Intrigue</p>
+         <p class="text-sm" style="color: #cbd5e1;">Hint at something valuable from the session they haven't fully explored.</p>
+        </div>
+       </div>
+       <div class="flex items-start gap-4 anim-fade-up anim-delay-2">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style="background: rgba(99,120,253,0.2); color: #6378FD;">
+         3
+        </div>
+        <div>
+         <p class="font-semibold text-sm" style="color: #6378FD;">Invitation to return</p>
+         <p class="text-sm" style="color: #cbd5e1;">Give them a clear, warm reason to come back.</p>
+        </div>
+       </div>
+      </div>
+      <div class="p-5" style="background: rgba(249,115,22,0.06); border-top: 1px solid rgba(255,255,255,0.06);">
+       <p class="text-xs font-semibold mb-2" style="color: #94a3b8;">EXAMPLE PING</p>
+       <p class="text-sm italic leading-relaxed" style="color: #e2e8f0;">"Hi dear, I can feel how heavy and confusing this situation is for you after everything you shared with me. I keep thinking about the 'when' we touched during our conversation — there's a specific detail that can change the way you act next (and it's important you don't miss it). If you're ready, come back and I'll explain what to do step-by-step."</p>
+      </div>
+     </div>
+     <div class="rounded-2xl p-5 mb-6" style="background: rgba(234,88,12,0.08); border: 1px solid rgba(249,115,22,0.2);">
+      <div class="flex items-start gap-3"><i data-lucide="alert-triangle" style="width:18px;height:18px;color:#f97316;flex-shrink:0;margin-top:2px;"></i>
+       <div>
+        <p class="font-semibold text-sm mb-1" style="color: #f97316;">Key reminders</p>
+        <ul class="text-sm space-y-1" style="color: #cbd5e1;">
+         <li>• Always use the <strong>Pings tab</strong> in NebulaX</li>
+         <li>• One ping = one complete message (never split)</li>
+         <li>• Send within <strong>24 hours</strong> after a chat</li>
+         <li>• Personalize — reference something from the session</li>
+        </ul>
+       </div>
+      </div>
+     </div>
+     <div class="text-center"><button onclick="goToScreen(6)" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #f97316, #ea580c);"> See my results <i data-lucide="arrow-right" style="width:18px;height:18px;"></i> </button>
+     </div>
+    </div><!-- SCREEN 6: END -->
+    <div id="screen-6" class="screen-transition screen-hidden w-full max-w-2xl mx-auto text-center">
+     <div class="confetti-container" id="confetti"></div>
+     <div class="anim-fade-up">
+      <div class="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6" style="background: rgba(34,197,94,0.15);"><i data-lucide="trophy" style="width:44px;height:44px;color:#22c55e;"></i>
+      </div>
+     </div>
+     <h2 class="font-display text-4xl font-bold mb-3 anim-fade-up anim-delay-1" style="color: #f1f5f9;">Training Complete!</h2>
+     <p class="text-lg mb-6 anim-fade-up anim-delay-2" style="color: #94a3b8;">Here's how you did</p>
+     <div id="score-display" class="anim-fade-up anim-delay-3 rounded-2xl p-6 mb-8 mx-auto" style="max-width: 360px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);"></div>
+     <p class="text-sm mb-8 anim-fade-up anim-delay-4" style="color: #94a3b8; max-width: 400px; margin: 0 auto;">Remember: Every ping is a chance to reconnect. Make it personal, make it timely, and always use the Pings tab.</p><button onclick="restartTraining()" class="anim-fade-up anim-delay-5 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105" style="background: rgba(255,255,255,0.08); color: #f1f5f9; border: 1px solid rgba(255,255,255,0.12);"> <i data-lucide="rotate-ccw" style="width:18px;height:18px;"></i> Restart training </button>
+    </div>
+   </div>
+  </div>
+  <script>
+  // State
+  let currentScreen = 1;
+  let score = 0;
+  let totalPossible = 5; // 3 quiz + 1 scenario + 1 sort
+  let quizIndex = 0;
+  let scenarioAnswered = false;
+
+  const quizData = [
+    {
+      q: "Where do you send a ping for it to count in analytics?",
+      options: ["Regular chat tab", "Messenger tab", "Pings tab in NebulaX"],
+      correct: 2,
+      feedbackCorrect: "Exactly. Only pings sent through the Pings tab appear in your stats.",
+      feedbackWrong: "Not quite — only the Pings tab counts. Everything else is invisible to analytics."
+    },
+    {
+      q: "You just finished a chat session. How long do you have to send a ping?",
+      options: ["1 hour", "15 minutes", "24 hours"],
+      correct: 2,
+      feedbackCorrect: "Right. 24 hours after a chat — that's your window to reach out while the connection is still warm.",
+      feedbackWrong: "After a chat the window is 24 hours. Use it well."
+    },
+    {
+      q: "Your ping isn't landing well. What's most likely the reason?",
+      options: ["You sent it too fast", "It was too short", "It had no personal detail from the session"],
+      correct: 2,
+      feedbackCorrect: "Yes. A ping that could've been sent to anyone doesn't feel like it was sent to them.",
+      feedbackWrong: "Length and timing matter less than personalization. A generic ping won't bring them back."
+    }
+  ];
+
+  const scenarioData = [
+    { text: "I'll ping her tomorrow — I still have time", icon: "⚠️", type: "warn",
+      feedback: "You do still have time — but the longer you wait, the colder the connection gets. The best pings go out the same day, while the emotion is fresh." },
+    { text: "Open Pings tab, write a personal ping referencing the date she mentioned, then start my shift", icon: "✅", type: "correct",
+      feedback: "Perfect. You used the window well. She'll get a notification that feels personal — and that's exactly when a ping works." },
+    { text: "Send a quick message through the regular chat tab", icon: "❌", type: "wrong",
+      feedback: "Good instinct — but this won't count in your analytics. Always use the Pings tab, otherwise it's invisible to the system." }
+  ];
+
+  const sortFragments = [
+    { id: 1, text: '"Hi dear,"' },
+    { id: 2, text: '"I can feel how much this situation is weighing on you right now."' },
+    { id: 3, text: '"I keep thinking about what you shared — there\'s something important I noticed."' },
+    { id: 4, text: '"There\'s a specific detail that could really change how you move forward."' },
+    { id: 5, text: '"And I don\'t want you to miss it."' },
+    { id: 6, text: '"When you\'re ready, come back and I\'ll walk you through it."' }
+  ];
+
+  // Screens
+  function goToScreen(num) {
+    const prev = document.getElementById('screen-' + currentScreen);
+    prev.classList.remove('screen-visible');
+    prev.classList.add('screen-hidden');
+
+    currentScreen = num;
+    const next = document.getElementById('screen-' + num);
+    setTimeout(() => {
+      next.classList.remove('screen-hidden');
+      next.classList.add('screen-visible');
+      updateProgress();
+      if (num === 2) renderQuiz();
+      if (num === 3) renderScenario();
+      if (num === 4) renderSort();
+      if (num === 6) renderEndScreen();
+      lucide.createIcons();
+    }, 300);
+  }
+
+  function updateProgress() {
+    const pct = ((currentScreen - 1) / 5) * 100;
+    document.getElementById('progress-bar').style.width = pct + '%';
+  }
+
+  // QUIZ
+  function renderQuiz() {
+    const container = document.getElementById('quiz-container');
+    if (quizIndex >= quizData.length) {
+      container.innerHTML = `
+        <div class="text-center py-8">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style="background:rgba(34,197,94,0.15);">
+            <i data-lucide="check-circle" style="width:32px;height:32px;color:#22c55e;"></i>
+          </div>
+          <p class="text-lg font-semibold mb-2" style="color:#f1f5f9;">Quiz complete!</p>
+          <p class="text-sm mb-6" style="color:#94a3b8;">Let's move to a real scenario.</p>
+          <button onclick="goToScreen(3)" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background:linear-gradient(135deg,#f97316,#ea580c);">
+            Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+          </button>
+        </div>`;
+      lucide.createIcons();
+      return;
+    }
+    const q = quizData[quizIndex];
+    container.innerHTML = `
+      <div class="mb-4 flex items-center gap-2">
+        <span class="text-xs font-semibold px-2 py-1 rounded" style="background:rgba(255,255,255,0.06);color:#94a3b8;">Question ${quizIndex+1} of ${quizData.length}</span>
+      </div>
+      <p class="text-lg font-semibold mb-5" style="color:#f1f5f9;">${q.q}</p>
+      <div class="space-y-3" id="quiz-options">
+        ${q.options.map((o, i) => `
+          <button onclick="answerQuiz(${i})" class="option-btn w-full text-left px-5 py-4 rounded-xl flex items-center gap-3" style="background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);color:#e2e8f0;">
+            <span class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style="background:rgba(255,255,255,0.06);color:#94a3b8;">${String.fromCharCode(65+i)}</span>
+            <span class="text-sm">${o}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div id="quiz-feedback" class="hidden mt-4"></div>
+    `;
+  }
+
+  function answerQuiz(idx) {
+    const q = quizData[quizIndex];
+    const correct = idx === q.correct;
+    if (correct) score++;
+
+    const btns = document.querySelectorAll('#quiz-options .option-btn');
+    btns.forEach((b, i) => {
+      b.classList.add('disabled');
+      if (i === q.correct) {
+        b.style.borderColor = '#22c55e';
+        b.style.background = 'rgba(34,197,94,0.1)';
+      } else if (i === idx && !correct) {
+        b.style.borderColor = '#ef4444';
+        b.style.background = 'rgba(239,68,68,0.1)';
+      }
+    });
+
+    const fb = document.getElementById('quiz-feedback');
+    fb.classList.remove('hidden');
+    fb.innerHTML = `
+      <div class="toast-msg rounded-xl p-4 flex items-start gap-3" style="background:${correct?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)'};border:1px solid ${correct?'rgba(34,197,94,0.3)':'rgba(239,68,68,0.3)'};">
+        <span class="text-lg">${correct?'✅':'❌'}</span>
+        <p class="text-sm" style="color:#e2e8f0;">${correct?q.feedbackCorrect:q.feedbackWrong}</p>
+      </div>`;
+
+    setTimeout(() => {
+      quizIndex++;
+      renderQuiz();
+      lucide.createIcons();
+    }, 2400);
+  }
+
+  // SCENARIO
+  function renderScenario() {
+    if (scenarioAnswered) return;
+    const container = document.getElementById('scenario-options');
+    container.innerHTML = scenarioData.map((o, i) => `
+      <button onclick="answerScenario(${i})" class="option-btn w-full text-left px-5 py-4 rounded-xl flex items-start gap-3" style="background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);color:#e2e8f0;">
+        <span class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style="background:rgba(255,255,255,0.06);color:#94a3b8;">${String.fromCharCode(65+i)}</span>
+        <span class="text-sm">${o.text}</span>
+      </button>
+    `).join('');
+  }
+
+  function answerScenario(idx) {
+    scenarioAnswered = true;
+    const o = scenarioData[idx];
+    if (o.type === 'correct') score++;
+
+    const btns = document.querySelectorAll('#scenario-options .option-btn');
+    btns.forEach((b, i) => {
+      b.classList.add('disabled');
+      const t = scenarioData[i].type;
+      if (t === 'correct') { b.style.borderColor='#22c55e'; b.style.background='rgba(34,197,94,0.1)'; }
+      else if (i === idx) {
+        b.style.borderColor = t==='warn'?'#eab308':'#ef4444';
+        b.style.background = t==='warn'?'rgba(234,179,8,0.1)':'rgba(239,68,68,0.1)';
+      }
+    });
+
+    const fb = document.getElementById('scenario-feedback');
+    fb.classList.remove('hidden');
+    const colors = { correct:['rgba(34,197,94,0.1)','rgba(34,197,94,0.3)'], warn:['rgba(234,179,8,0.1)','rgba(234,179,8,0.3)'], wrong:['rgba(239,68,68,0.1)','rgba(239,68,68,0.3)'] };
+    fb.innerHTML = `
+      <div class="toast-msg rounded-xl p-4 flex items-start gap-3" style="background:${colors[o.type][0]};border:1px solid ${colors[o.type][1]};">
+        <span class="text-lg">${o.icon}</span>
+        <p class="text-sm" style="color:#e2e8f0;">${o.feedback}</p>
+      </div>`;
+    document.getElementById('scenario-next').classList.remove('hidden');
+    lucide.createIcons();
+  }
+
+  // SORT (drag & drop)
+  let sortOrder = [];
+  function renderSort() {
+    const container = document.getElementById('sort-container');
+    // Shuffle
+    sortOrder = [...sortFragments].sort(() => Math.random() - 0.5);
+    renderSortItems();
+  }
+
+  function renderSortItems() {
+    const container = document.getElementById('sort-container');
+    container.innerHTML = sortOrder.map((f, i) => `
+      <div class="drag-item rounded-xl px-5 py-4 flex items-center gap-3" draggable="true"
+           data-idx="${i}" style="background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);">
+        <span class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style="background:rgba(249,115,22,0.15);color:#f97316;">${i+1}</span>
+        <span class="text-sm" style="color:#e2e8f0;">${f.text}</span>
+      </div>
+    `).join('');
+
+    // Drag events
+    const items = container.querySelectorAll('.drag-item');
+    let dragIdx = null;
+
+    items.forEach(item => {
+      item.addEventListener('dragstart', e => {
+        dragIdx = +item.dataset.idx;
+        item.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      item.addEventListener('dragend', () => {
+        item.classList.remove('dragging');
+        container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+      });
+      item.addEventListener('dragover', e => {
+        e.preventDefault();
+        item.classList.add('drag-over');
+      });
+      item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+      item.addEventListener('drop', e => {
+        e.preventDefault();
+        item.classList.remove('drag-over');
+        const dropIdx = +item.dataset.idx;
+        if (dragIdx !== null && dragIdx !== dropIdx) {
+          const temp = sortOrder[dragIdx];
+          sortOrder.splice(dragIdx, 1);
+          sortOrder.splice(dropIdx, 0, temp);
+          renderSortItems();
+        }
+      });
+
+      // Touch support
+      let touchStartY = 0;
+      let touchIdx = null;
+      item.addEventListener('touchstart', e => {
+        touchIdx = +item.dataset.idx;
+        touchStartY = e.touches[0].clientY;
+        item.classList.add('dragging');
+      }, { passive: true });
+      item.addEventListener('touchmove', e => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        container.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
+        if (el && el.closest('.drag-item')) el.closest('.drag-item').classList.add('drag-over');
+      }, { passive: false });
+      item.addEventListener('touchend', e => {
+        item.classList.remove('dragging');
+        const touch = e.changedTouches[0];
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        container.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
+        if (el && el.closest('.drag-item')) {
+          const dropIdx = +el.closest('.drag-item').dataset.idx;
+          if (touchIdx !== null && touchIdx !== dropIdx) {
+            const temp = sortOrder[touchIdx];
+            sortOrder.splice(touchIdx, 1);
+            sortOrder.splice(dropIdx, 0, temp);
+            renderSortItems();
+          }
+        }
+      });
+    });
+  }
+
+  function checkSort() {
+    const correct = sortOrder.every((f, i) => f.id === i + 1);
+    const fb = document.getElementById('sort-feedback');
+    fb.classList.remove('hidden');
+
+    if (correct) {
+      score++;
+      fb.innerHTML = `<div class="toast-msg rounded-xl p-4 flex items-start gap-3" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);">
+        <span class="text-lg">✅</span><p class="text-sm" style="color:#e2e8f0;">Perfect order! That's exactly how a strong ping flows — emotion, intrigue, invitation.</p></div>`;
+      document.getElementById('check-sort-btn').classList.add('hidden');
+      document.getElementById('sort-next-btn').classList.remove('hidden');
+    } else {
+      fb.innerHTML = `<div class="toast-msg rounded-xl p-4 flex items-start gap-3" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);">
+        <span class="text-lg">🔄</span><p class="text-sm" style="color:#e2e8f0;">Not quite — try again. Remember: start with emotion, build intrigue, then invite them back.</p></div>`;
+    }
+    lucide.createIcons();
+  }
+
+  // END SCREEN
+  function renderEndScreen() {
+    const pct = Math.round((score / totalPossible) * 100);
+    const display = document.getElementById('score-display');
+    let emoji = pct >= 80 ? '🌟' : pct >= 60 ? '👍' : '💪';
+    let msg = pct >= 80 ? "Outstanding! You've nailed the ping strategy." : pct >= 60 ? "Good job! A few areas to sharpen." : "Keep practicing — you'll get there!";
+
+    display.innerHTML = `
+      <div class="text-5xl mb-3">${emoji}</div>
+      <p class="text-4xl font-bold font-display mb-1" style="color:#f97316;">${score}/${totalPossible}</p>
+      <p class="text-sm" style="color:#94a3b8;">${msg}</p>
+    `;
+
+    // Confetti
+    const confetti = document.getElementById('confetti');
+    confetti.innerHTML = '';
+    if (pct >= 60) {
+      const colors = ['#f97316','#22c55e','#3b82f6','#eab308','#ec4899'];
+      for (let i = 0; i < 40; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.cssText = `left:${Math.random()*100}%;top:-10px;background:${colors[i%colors.length]};animation:fadeUp ${1+Math.random()*2}s ease-out ${Math.random()*0.5}s both;transform:rotate(${Math.random()*360}deg);`;
+        confetti.appendChild(piece);
+      }
+    }
+    lucide.createIcons();
+  }
+
+  function restartTraining() {
+    score = 0; quizIndex = 0; scenarioAnswered = false;
+    document.getElementById('scenario-feedback').classList.add('hidden');
+    document.getElementById('scenario-next').classList.add('hidden');
+    document.getElementById('sort-feedback').classList.add('hidden');
+    document.getElementById('check-sort-btn').classList.remove('hidden');
+    document.getElementById('sort-next-btn').classList.add('hidden');
+    goToScreen(1);
+  }
+
+  // Element SDK
+  const defaultConfig = {
+    main_title: "Pings sent on time",
+    intro_subtitle: "The chat just ended. The client is still thinking about you.",
+    background_color: "#0f1729",
+    accent_color: "#f97316",
+    text_color: "#f1f5f9",
+    font_family: "DM Sans"
+  };
+
+  function applyConfig(config) {
+    const t = config.main_title || defaultConfig.main_title;
+    const s = config.intro_subtitle || defaultConfig.intro_subtitle;
+    const bg = config.background_color || defaultConfig.background_color;
+    const accent = config.accent_color || defaultConfig.accent_color;
+    const txt = config.text_color || defaultConfig.text_color;
+    const font = config.font_family || defaultConfig.font_family;
+
+    document.getElementById('intro-title').textContent = t;
+    document.getElementById('intro-subtitle').textContent = s;
+    document.getElementById('app').style.background = bg;
+
+    document.querySelectorAll('.font-display').forEach(el => {
+      el.style.fontFamily = `${font}, Playfair Display, serif`;
+    });
+  }
+
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (config) => applyConfig(config),
+    mapToCapabilities: (config) => ({
+      recolorables: [
+        { get: () => config.background_color || defaultConfig.background_color, set: v => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }},
+        { get: () => config.accent_color || defaultConfig.accent_color, set: v => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }},
+        { get: () => config.text_color || defaultConfig.text_color, set: v => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }},
+      ],
+      borderables: [],
+      fontEditable: {
+        get: () => config.font_family || defaultConfig.font_family,
+        set: v => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+      },
+      fontSizeable: undefined
+    }),
+    mapToEditPanelValues: (config) => new Map([
+      ["main_title", config.main_title || defaultConfig.main_title],
+      ["intro_subtitle", config.intro_subtitle || defaultConfig.intro_subtitle]
+    ])
+  });
+
+  // Init
+  lucide.createIcons();
+  updateProgress();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e2ef154c0b3bf60',t:'MTc3NDYyMDI1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
