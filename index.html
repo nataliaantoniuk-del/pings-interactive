@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="en" class="h-full">
- <head>
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pings Sent On Time</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&amp;family=Questrial:wght@400&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Questrial&display=swap" rel="stylesheet">
   <style>
     html, body { height: 100%; margin: 0; }
     * { font-family: 'Questrial', sans-serif; }
@@ -16,21 +16,21 @@
       from { opacity: 0; transform: translateY(24px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    @keyframes pulse-ring {
-      0% { transform: scale(0.8); opacity: 0.6; }
-      100% { transform: scale(1.6); opacity: 0; }
-    }
     @keyframes shimmer {
       0% { background-position: -200% 0; }
       100% { background-position: 200% 0; }
     }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.8); opacity: 0.6; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
     .anim-fade-up { animation: fadeUp 0.6s ease-out both; }
     .anim-delay-1 { animation-delay: 0.1s; }
     .anim-delay-2 { animation-delay: 0.2s; }
     .anim-delay-3 { animation-delay: 0.3s; }
     .anim-delay-4 { animation-delay: 0.4s; }
     .anim-delay-5 { animation-delay: 0.5s; }
-    .anim-delay-6 { animation-delay: 0.6s; }
 
     .pulse-dot::before {
       content: '';
@@ -41,45 +41,23 @@
       animation: pulse-ring 2s ease-out infinite;
     }
 
-    .screen-transition {
-      transition: opacity 0.4s ease, transform 0.4s ease;
-    }
+    .screen-transition { transition: opacity 0.4s ease, transform 0.4s ease; }
     .screen-hidden {
-      opacity: 0;
-      transform: translateY(16px);
-      pointer-events: none;
-      position: absolute;
-      width: 100%;
+      opacity: 0; transform: translateY(16px);
+      pointer-events: none; position: absolute; width: 100%;
     }
-    .screen-visible {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-
-    .drag-item {
-      cursor: grab;
-      user-select: none;
-      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-    }
-    .drag-item:active { cursor: grabbing; }
-    .drag-item.dragging {
-      opacity: 0.5;
-      transform: scale(0.97);
-    }
-    .drag-item.drag-over {
-      border-top: 3px solid #f97316;
-    }
+    .screen-visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
     .option-btn {
       transition: all 0.25s ease;
       border: 2px solid transparent;
+      cursor: pointer;
     }
-    .option-btn:hover:not(.selected):not(.disabled) {
+    .option-btn:hover:not(.disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
     }
-    .option-btn.disabled { pointer-events: none; opacity: 0.6; }
+    .option-btn.disabled { pointer-events: none; }
 
     .progress-fill {
       transition: width 0.5s ease;
@@ -88,226 +66,313 @@
       animation: shimmer 2s infinite;
     }
 
+    .drag-item {
+      cursor: grab;
+      user-select: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .drag-item:active { cursor: grabbing; }
+    .drag-item.dragging { opacity: 0.5; transform: scale(0.97); }
+    .drag-item.drag-over { border-top: 3px solid #f97316; }
+
+    .toast-msg { animation: fadeUp 0.4s ease-out both; }
+
     .confetti-container {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
+      position: absolute; inset: 0;
+      pointer-events: none; overflow: hidden;
     }
     .confetti-piece {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      border-radius: 2px;
-    }
-
-    .toast-msg {
-      animation: fadeUp 0.4s ease-out both;
+      position: absolute; width: 8px; height: 8px; border-radius: 2px;
     }
   </style>
-  <style>body { box-sizing: border-box; }</style>
- </head>
- <body class="h-full">
-  <div id="app" class="h-full w-full overflow-auto" style="background: #151821;">
-   <div class="fixed top-0 left-0 w-full z-50" style="height: 4px; background: rgba(255,255,255,0.08);">
+</head>
+<body class="h-full">
+<div id="app" class="h-full w-full overflow-auto" style="background: #151821;">
+
+  <div class="fixed top-0 left-0 w-full z-50" style="height: 4px; background: rgba(255,255,255,0.08);">
     <div id="progress-bar" class="h-full progress-fill" style="width: 0%;"></div>
-   </div>
-   <div id="screens" class="relative w-full min-h-full flex items-center justify-center p-4 sm:p-8" style="min-height: 100%;">
+  </div>
+
+  <div id="screens" class="relative w-full min-h-full flex items-center justify-center p-4 sm:p-8">
 
     <!-- SCREEN 1: INTRO -->
     <div id="screen-1" class="screen-transition screen-visible w-full max-w-2xl mx-auto text-center">
-     <div class="anim-fade-up">
-      <div class="relative inline-flex items-center justify-center w-20 h-20 rounded-full mb-8" style="background: rgba(249,115,22,0.15);">
-       <div class="pulse-dot relative text-orange-400"><i data-lucide="message-circle" style="width:36px;height:36px;"></i></div>
+      <div class="anim-fade-up">
+        <div class="relative inline-flex items-center justify-center w-20 h-20 rounded-full mb-8" style="background: rgba(249,115,22,0.15);">
+          <div class="pulse-dot relative" style="color: #f97316;">
+            <i data-lucide="message-circle" style="width:36px;height:36px;color:#f97316;"></i>
+          </div>
+        </div>
       </div>
-     </div>
-     <h1 id="intro-title" class="font-display text-4xl sm:text-5xl font-bold mb-4 anim-fade-up anim-delay-1" style="color: #f1f5f9;">Pings sent on time</h1>
-     <p id="intro-subtitle" class="text-lg sm:text-xl mb-4 anim-fade-up anim-delay-2" style="color: #6378FD;">The chat just ended. The client is still thinking about you.</p>
-     <p class="text-base mb-10 anim-fade-up anim-delay-3" style="color: #94a3b8; max-width: 480px; margin-left: auto; margin-right: auto;">This is your window — 24 hours to send one message that can bring them back. Let's make sure you know exactly how to use it.</p>
-     <button onclick="goToScreen(2)" class="anim-fade-up anim-delay-4 inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white font-semibold text-lg transition-all hover:scale-105" style="background: linear-gradient(135deg, #f97316, #ea580c);">
-      Let's start <i data-lucide="arrow-right" style="width:20px;height:20px;"></i>
-     </button>
+      <h1 class="font-display text-4xl sm:text-5xl font-bold mb-4 anim-fade-up anim-delay-1" style="color: #f1f5f9;">Pings sent on time</h1>
+      <p class="text-lg sm:text-xl mb-4 anim-fade-up anim-delay-2" style="color: #6378FD;">Your Mandatory tab has clients waiting. They already know you.</p>
+      <p class="text-base mb-10 anim-fade-up anim-delay-3" style="color: #94a3b8; max-width: 480px; margin-left: auto; margin-right: auto;">The system flagged them as high-priority. Your job is to reach out — personally, consistently, and through the right channel. Let's train exactly how.</p>
+      <button onclick="goToScreen(2)" class="anim-fade-up anim-delay-4 inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white font-semibold text-lg transition-all hover:scale-105" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+        Let's start <i data-lucide="arrow-right" style="width:20px;height:20px;"></i>
+      </button>
     </div>
 
     <!-- SCREEN 2: QUIZ -->
     <div id="screen-2" class="screen-transition screen-hidden w-full max-w-2xl mx-auto">
-     <div class="text-center mb-8">
-      <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style="background: rgba(99,120,253,0.15); color: #6378FD;">QUIZ · SCREEN 2 OF 6</span>
-      <h2 class="font-display text-3xl font-bold mb-2" style="color: #f1f5f9;">Before we practice — let's check the basics</h2>
-     </div>
-     <div id="quiz-container"></div>
+      <div class="text-center mb-8">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style="background: rgba(99,120,253,0.15); color: #6378FD;">QUIZ · SCREEN 2 OF 8</span>
+        <h2 class="font-display text-3xl font-bold mb-2" style="color: #f1f5f9;">Let's check the basics first</h2>
+      </div>
+      <div id="quiz-container"></div>
     </div>
 
     <!-- SCREEN 3: SCENARIO -->
     <div id="screen-3" class="screen-transition screen-hidden w-full max-w-2xl mx-auto">
-     <div class="text-center mb-6">
-      <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style="background: rgba(99,120,253,0.15); color: #6378FD;">SCENARIO · SCREEN 3 OF 6</span>
-      <h2 class="font-display text-3xl font-bold mb-2" style="color: #f1f5f9;">A chat just ended. Now what?</h2>
-     </div>
-     <div class="rounded-2xl p-6 mb-6" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
-      <div class="flex items-start gap-3 mb-4">
-       <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(99,120,253,0.15);"><i data-lucide="book-open" style="width:18px;height:18px;color:#6378FD;"></i></div>
-       <p class="text-sm leading-relaxed" style="color: #cbd5e1;">You just finished a 35-minute chat with a client. She was emotional, talked about her relationship and an upcoming important date. It's been 3 hours since the chat ended. You're about to start your next shift.</p>
+      <div class="text-center mb-6">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style="background: rgba(99,120,253,0.15); color: #6378FD;">SCENARIO · SCREEN 3 OF 8</span>
+        <h2 class="font-display text-3xl font-bold mb-2" style="color: #f1f5f9;">Your shift just started. What's first?</h2>
       </div>
-      <p class="font-semibold text-base" style="color: #f1f5f9;">What do you do?</p>
-     </div>
-     <div id="scenario-options" class="space-y-3"></div>
-     <div id="scenario-feedback" class="hidden mt-4"></div>
-     <div id="scenario-next" class="hidden text-center mt-6">
-      <button onclick="goToScreen(4)" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #6378FD, #5169e8);">
-       Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
-      </button>
-     </div>
+      <div class="rounded-2xl p-5 mb-6" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
+        <p class="text-xs font-semibold mb-2" style="color: #94a3b8;">SITUATION</p>
+        <p class="text-sm leading-relaxed" style="color: #e2e8f0;">You've just gone online. There are 12 clients in your Mandatory tab from yesterday's sessions. A new live chat request is also coming in. Your inbox has 3 unread messages from clients in the All tab.</p>
+      </div>
+      <p class="text-sm font-semibold mb-4" style="color: #f1f5f9;">What do you do first?</p>
+      <div class="space-y-3" id="s3-options">
+        <button onclick="answerS3(0)" class="option-btn w-full text-left px-5 py-4 rounded-xl" style="background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);color:#e2e8f0;">
+          <span class="text-xs font-semibold block mb-1" style="color:#94a3b8;">OPTION A</span>
+          <span class="text-sm">Accept the live chat request — a client is actively waiting right now.</span>
+        </button>
+        <button onclick="answerS3(1)" class="option-btn w-full text-left px-5 py-4 rounded-xl" style="background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);color:#e2e8f0;">
+          <span class="text-xs font-semibold block mb-1" style="color:#94a3b8;">OPTION B</span>
+          <span class="text-sm">Open the Pings tab → go to Mandatory → start working through the list of 12 clients before doing anything else.</span>
+        </button>
+        <button onclick="answerS3(2)" class="option-btn w-full text-left px-5 py-4 rounded-xl" style="background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);color:#e2e8f0;">
+          <span class="text-xs font-semibold block mb-1" style="color:#94a3b8;">OPTION C</span>
+          <span class="text-sm">Reply to the 3 unread messages in the All tab — they've been waiting the longest.</span>
+        </button>
+      </div>
+      <div id="s3-feedback" class="hidden mt-4"></div>
+      <div id="s3-next" class="hidden text-center mt-6">
+        <button onclick="goToScreen(4)" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #6378FD, #5169e8);">
+          Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+        </button>
+      </div>
     </div>
 
-    <!-- SCREEN 4: SORTING -->
+    <!-- SCREEN 4: SPOT THE MISTAKE -->
     <div id="screen-4" class="screen-transition screen-hidden w-full max-w-2xl mx-auto">
-     <div class="text-center mb-6">
-      <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style="background: rgba(99,120,253,0.15); color: #6378FD;">BUILD IT · SCREEN 4 OF 6</span>
-      <h2 class="font-display text-3xl font-bold mb-2" style="color: #f1f5f9;">Put the ping together</h2>
-      <p class="text-sm" style="color: #94a3b8;">Drag these fragments into the correct order to build a strong ping.</p>
-     </div>
-     <div id="sort-container" class="space-y-2 mb-6"></div>
-     <div id="sort-feedback" class="hidden mb-4"></div>
-     <div class="text-center">
-      <button id="check-sort-btn" onclick="checkSort()" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #6378FD, #5169e8);">
-       Check order <i data-lucide="check" style="width:18px;height:18px;"></i>
-      </button>
-      <button id="sort-next-btn" onclick="goToScreen(5)" class="hidden inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #6378FD, #5169e8);">
-       Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
-      </button>
-     </div>
+      <div class="text-center mb-6">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style="background: rgba(239,68,68,0.15); color: #f87171;">SPOT THE MISTAKE · SCREEN 4 OF 8</span>
+        <h2 class="font-display text-3xl font-bold mb-2" style="color: #f1f5f9;">Why didn't this ping count?</h2>
+        <p class="text-sm" style="color: #94a3b8;">An expert sent a ping but it didn't appear in analytics. Find out why.</p>
+      </div>
+      <div class="rounded-2xl p-5 mb-6" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
+        <p class="text-xs font-semibold mb-3" style="color: #94a3b8;">WHAT HAPPENED</p>
+        <div class="space-y-3">
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background:rgba(99,120,253,0.2);color:#6378FD;">1</div>
+            <p class="text-sm" style="color:#e2e8f0;">Expert opens NebulaX and sees a client from yesterday's session in the Mandatory tab.</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background:rgba(99,120,253,0.2);color:#6378FD;">2</div>
+            <p class="text-sm" style="color:#e2e8f0;">Instead of using the Pings tab, the expert finds the client in the regular Chats view and sends a personal message there.</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background:rgba(99,120,253,0.2);color:#6378FD;">3</div>
+            <p class="text-sm" style="color:#e2e8f0;">The message was warm, personal, and had all the right elements. But it didn't appear in the ping analytics.</p>
+          </div>
+        </div>
+        <div class="mt-3 rounded-xl p-2 flex items-center gap-2" style="background: rgba(239,68,68,0.08);">
+          <i data-lucide="alert-circle" style="width:14px;height:14px;color:#f87171;flex-shrink:0;"></i>
+          <p class="text-xs" style="color: #f87171;">Ping not counted in analytics</p>
+        </div>
+      </div>
+      <p class="text-sm font-semibold mb-4" style="color: #f1f5f9;">What went wrong?</p>
+      <div class="space-y-3" id="s4-options">
+        <button onclick="answerS4(0)" class="option-btn w-full text-left px-5 py-4 rounded-xl" style="background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);color:#e2e8f0;">
+          <span class="text-sm">A) The message wasn't personal enough to count as a ping</span>
+        </button>
+        <button onclick="answerS4(1)" class="option-btn w-full text-left px-5 py-4 rounded-xl" style="background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);color:#e2e8f0;">
+          <span class="text-sm">B) The ping was sent through the regular Chats view instead of the Pings tab — only the Pings tab counts in analytics</span>
+        </button>
+        <button onclick="answerS4(2)" class="option-btn w-full text-left px-5 py-4 rounded-xl" style="background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);color:#e2e8f0;">
+          <span class="text-sm">C) The client wasn't in the Mandatory tab so the ping couldn't be tracked</span>
+        </button>
+      </div>
+      <div id="s4-feedback" class="hidden mt-4"></div>
+      <div id="s4-next" class="hidden text-center mt-6">
+        <button onclick="goToScreen(5)" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #6378FD, #5169e8);">
+          Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+        </button>
+      </div>
     </div>
 
-    <!-- SCREEN 5: REVIEW -->
+    <!-- SCREEN 5: SCENARIO — Generic vs personal ping -->
     <div id="screen-5" class="screen-transition screen-hidden w-full max-w-2xl mx-auto">
-     <div class="text-center mb-6">
-      <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style="background: rgba(99,120,253,0.15); color: #6378FD;">REVIEW · SCREEN 5 OF 6</span>
-      <h2 class="font-display text-3xl font-bold mb-3" style="color: #f1f5f9;">The anatomy of a great ping</h2>
-      <p class="text-sm mb-6" style="color: #94a3b8;">Remember this structure every time.</p>
-     </div>
-     <div class="rounded-2xl overflow-hidden mb-6" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
-      <div class="p-6 space-y-4">
-       <div class="flex items-start gap-4 anim-fade-up">
-        <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style="background: rgba(99,120,253,0.2); color: #6378FD;">1</div>
-        <div>
-         <p class="font-semibold text-sm" style="color: #6378FD;">Emotion</p>
-         <p class="text-sm" style="color: #cbd5e1;">Acknowledge what they're feeling. Make it personal.</p>
-        </div>
-       </div>
-       <div class="flex items-start gap-4 anim-fade-up anim-delay-1">
-        <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style="background: rgba(99,120,253,0.2); color: #6378FD;">2</div>
-        <div>
-         <p class="font-semibold text-sm" style="color: #6378FD;">Insight / Intrigue</p>
-         <p class="text-sm" style="color: #cbd5e1;">Hint at something valuable from the session they haven't fully explored.</p>
-        </div>
-       </div>
-       <div class="flex items-start gap-4 anim-fade-up anim-delay-2">
-        <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style="background: rgba(99,120,253,0.2); color: #6378FD;">3</div>
-        <div>
-         <p class="font-semibold text-sm" style="color: #6378FD;">Invitation to return</p>
-         <p class="text-sm" style="color: #cbd5e1;">Give them a clear, warm reason to come back.</p>
-        </div>
-       </div>
+      <div class="text-center mb-6">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style="background: rgba(99,120,253,0.15); color: #6378FD;">SCENARIO · SCREEN 5 OF 8</span>
+        <h2 class="font-display text-3xl font-bold mb-2" style="color: #f1f5f9;">Which ping actually works?</h2>
       </div>
-      <div class="p-5" style="background: rgba(249,115,22,0.06); border-top: 1px solid rgba(255,255,255,0.06);">
-       <p class="text-xs font-semibold mb-2" style="color: #94a3b8;">EXAMPLE PING</p>
-       <p class="text-sm italic leading-relaxed" style="color: #e2e8f0;">"Hi dear, I can feel how heavy and confusing this situation is for you after everything you shared with me. I keep thinking about the 'when' we touched during our conversation — there's a specific detail that can change the way you act next (and it's important you don't miss it). If you're ready, come back and I'll explain what to do step-by-step."</p>
+      <div class="rounded-2xl p-5 mb-6" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
+        <p class="text-xs font-semibold mb-2" style="color: #94a3b8;">CONTEXT</p>
+        <p class="text-sm leading-relaxed" style="color: #e2e8f0;">A client is in your Mandatory tab. During your last session they were anxious about their relationship and mentioned an important date coming up soon. You're writing a ping to bring them back.</p>
       </div>
-     </div>
-     <div class="rounded-2xl p-5 mb-6" style="background: rgba(234,88,12,0.08); border: 1px solid rgba(249,115,22,0.2);">
-      <div class="flex items-start gap-3"><i data-lucide="alert-triangle" style="width:18px;height:18px;color:#f97316;flex-shrink:0;margin-top:2px;"></i>
-       <div>
-        <p class="font-semibold text-sm mb-1" style="color: #f97316;">Key reminders</p>
-        <ul class="text-sm space-y-1" style="color: #cbd5e1;">
-         <li>• Always use the <strong>Pings tab</strong> in NebulaX</li>
-         <li>• One ping = one complete message (never split)</li>
-         <li>• Send within <strong>24 hours</strong> after a chat</li>
-         <li>• Personalize — reference something from the session</li>
-        </ul>
-       </div>
+      <p class="text-sm font-semibold mb-4" style="color: #f1f5f9;">Which ping would you send?</p>
+      <div class="space-y-3" id="s5-options">
+        <button onclick="answerS5(0)" class="option-btn w-full text-left px-5 py-4 rounded-xl" style="background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);color:#e2e8f0;">
+          <span class="text-xs font-semibold block mb-1" style="color:#94a3b8;">OPTION A</span>
+          <span class="text-sm italic">"Hi dear, hope you're doing well! I've been thinking about you and wanted to check in. Come back whenever you're ready to chat!"</span>
+        </button>
+        <button onclick="answerS5(1)" class="option-btn w-full text-left px-5 py-4 rounded-xl" style="background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);color:#e2e8f0;">
+          <span class="text-xs font-semibold block mb-1" style="color:#94a3b8;">OPTION B</span>
+          <span class="text-sm italic">"Hi dear, I can feel how heavy and confusing this situation is for you after everything you shared with me. I keep thinking about what we touched on — there's a specific detail that can change the way you act next (and it's important you don't miss it). If you're ready, come back and I'll explain what to do step-by-step."</span>
+        </button>
+        <button onclick="answerS5(2)" class="option-btn w-full text-left px-5 py-4 rounded-xl" style="background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);color:#e2e8f0;">
+          <span class="text-xs font-semibold block mb-1" style="color:#94a3b8;">OPTION C</span>
+          <span class="text-sm italic">"Hello! I wanted to reach out and see if you have any questions from our last session. I'm available if you'd like to continue."</span>
+        </button>
       </div>
-     </div>
-     <div class="text-center">
-      <button onclick="goToScreen(6)" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #f97316, #ea580c);">
-       See my results <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+      <div id="s5-feedback" class="hidden mt-4"></div>
+      <div id="s5-next" class="hidden text-center mt-6">
+        <button onclick="goToScreen(6)" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #6378FD, #5169e8);">
+          Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN 6: DRAG & DROP -->
+    <div id="screen-6" class="screen-transition screen-hidden w-full max-w-2xl mx-auto">
+      <div class="text-center mb-6">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style="background: rgba(99,120,253,0.15); color: #6378FD;">BUILD IT · SCREEN 6 OF 8</span>
+        <h2 class="font-display text-3xl font-bold mb-2" style="color: #f1f5f9;">Put the ping together</h2>
+        <p class="text-sm" style="color: #94a3b8;">Drag these 4 elements into the correct order to build a strong ping.</p>
+      </div>
+      <div id="sort-container" class="space-y-2 mb-6"></div>
+      <div id="sort-feedback" class="hidden mb-4"></div>
+      <div class="text-center">
+        <button id="check-sort-btn" onclick="checkSort()" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #6378FD, #5169e8);">
+          Check order <i data-lucide="check" style="width:18px;height:18px;"></i>
+        </button>
+        <button id="sort-next-btn" onclick="goToScreen(7)" class="hidden inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #6378FD, #5169e8);">
+          Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN 7: REVIEW -->
+    <div id="screen-7" class="screen-transition screen-hidden w-full max-w-2xl mx-auto">
+      <div class="text-center mb-6">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style="background: rgba(249,115,22,0.15); color: #f97316;">REVIEW · SCREEN 7 OF 8</span>
+        <h2 class="font-display text-3xl font-bold mb-3" style="color: #f1f5f9;">Your Mandatory tab rules</h2>
+        <p class="text-sm mb-6" style="color: #94a3b8;">Keep these close. Every shift, every time.</p>
+      </div>
+      <div class="rounded-2xl overflow-hidden mb-6" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
+        <div class="p-6 space-y-5">
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style="background: rgba(249,115,22,0.2); color: #f97316;">1</div>
+            <div>
+              <p class="font-semibold text-sm mb-1" style="color: #f97316;">Start every shift with Mandatory</p>
+              <p class="text-sm" style="color: #cbd5e1;">Open NebulaX → Pings tab → Mandatory. Work through the list before anything else. These are your highest-priority clients.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style="background: rgba(249,115,22,0.2); color: #f97316;">2</div>
+            <div>
+              <p class="font-semibold text-sm mb-1" style="color: #f97316;">Always use the Pings tab</p>
+              <p class="text-sm" style="color: #cbd5e1;">Sending through regular chat doesn't count. Only pings sent through the Pings tab appear in your analytics. No exceptions.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style="background: rgba(249,115,22,0.2); color: #f97316;">3</div>
+            <div>
+              <p class="font-semibold text-sm mb-1" style="color: #f97316;">One ping = one complete message</p>
+              <p class="text-sm" style="color: #cbd5e1;">Never split a ping into multiple messages. One personal message with the full structure — emotion, intrigue, invitation.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style="background: rgba(249,115,22,0.2); color: #f97316;">4</div>
+            <div>
+              <p class="font-semibold text-sm mb-1" style="color: #f97316;">Cover 85%+ of your Mandatory list</p>
+              <p class="text-sm" style="color: #cbd5e1;">Distribute throughout your shift: start → middle → end. Don't leave clients uncontacted. That's where the metric drops.</p>
+            </div>
+          </div>
+        </div>
+        <div class="p-5" style="background: rgba(249,115,22,0.06); border-top: 1px solid rgba(255,255,255,0.06);">
+          <p class="text-xs font-semibold mb-2" style="color: #94a3b8;">EXAMPLE PING</p>
+          <p class="text-sm italic leading-relaxed" style="color: #e2e8f0;">"Hi dear, I can feel how heavy and confusing this situation is for you after everything you shared with me. I keep thinking about what we touched on — there's a specific detail that can change the way you act next (and it's important you don't miss it). If you're ready, come back and I'll explain what to do step-by-step."</p>
+          <div class="flex gap-2 mt-3 flex-wrap">
+            <span class="px-2 py-1 rounded text-xs" style="background:rgba(99,120,253,0.15);color:#6378FD;">Emotion</span>
+            <span class="px-2 py-1 rounded text-xs" style="background:rgba(249,115,22,0.15);color:#f97316;">Intrigue</span>
+            <span class="px-2 py-1 rounded text-xs" style="background:rgba(34,197,94,0.15);color:#22c55e;">Invitation</span>
+          </div>
+        </div>
+      </div>
+      <div class="text-center">
+        <button onclick="goToScreen(8)" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+          See my results <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN 8: END -->
+    <div id="screen-8" class="screen-transition screen-hidden w-full max-w-2xl mx-auto text-center">
+      <div class="confetti-container" id="confetti"></div>
+      <div class="anim-fade-up">
+        <div class="relative inline-flex items-center justify-center w-24 h-24 rounded-full mb-6" style="background: rgba(249,115,22,0.15);">
+          <i data-lucide="trophy" style="width:44px;height:44px;color:#f97316;"></i>
+        </div>
+      </div>
+      <h2 class="font-display text-4xl font-bold mb-3 anim-fade-up anim-delay-1" style="color: #f1f5f9;">Training Complete!</h2>
+      <p class="text-lg mb-6 anim-fade-up anim-delay-2" style="color: #94a3b8;">Here's how you did</p>
+      <div id="score-display" class="anim-fade-up anim-delay-3 rounded-2xl p-6 mb-8 mx-auto" style="max-width: 360px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);"></div>
+      <p class="text-sm mb-8 anim-fade-up anim-delay-4" style="color: #94a3b8; max-width: 400px; margin: 0 auto;">Mandatory tab. Pings tab. Personal message. 85%+. That's the whole system — and now you know it.</p>
+      <button onclick="restartTraining()" class="anim-fade-up anim-delay-5 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105" style="background: rgba(255,255,255,0.08); color: #f1f5f9; border: 1px solid rgba(255,255,255,0.12);">
+        <i data-lucide="rotate-ccw" style="width:18px;height:18px;"></i> Try again
       </button>
-     </div>
     </div>
 
-    <!-- SCREEN 6: END -->
-    <div id="screen-6" class="screen-transition screen-hidden w-full max-w-2xl mx-auto text-center">
-     <div class="confetti-container" id="confetti"></div>
-     <div class="anim-fade-up">
-      <div class="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6" style="background: rgba(34,197,94,0.15);">
-       <i data-lucide="trophy" style="width:44px;height:44px;color:#22c55e;"></i>
-      </div>
-     </div>
-     <h2 class="font-display text-4xl font-bold mb-3 anim-fade-up anim-delay-1" style="color: #f1f5f9;">Training Complete!</h2>
-     <p class="text-lg mb-6 anim-fade-up anim-delay-2" style="color: #94a3b8;">Here's how you did</p>
-     <div id="score-display" class="anim-fade-up anim-delay-3 rounded-2xl p-6 mb-8 mx-auto" style="max-width: 360px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);"></div>
-     <p class="text-sm mb-8 anim-fade-up anim-delay-4" style="color: #94a3b8; max-width: 400px; margin: 0 auto;">Remember: Every ping is a chance to reconnect. Make it personal, make it timely, and always use the Pings tab.</p>
-     <button onclick="restartTraining()" class="anim-fade-up anim-delay-5 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105" style="background: rgba(255,255,255,0.08); color: #f1f5f9; border: 1px solid rgba(255,255,255,0.12);">
-      <i data-lucide="rotate-ccw" style="width:18px;height:18px;"></i> Try again
-     </button>
-    </div>
-
-   </div>
   </div>
-  <script>
+</div>
+
+<script>
   let currentScreen = 1;
   let score = 0;
-  let totalPossible = 5;
+  let totalPossible = 7;
   let quizIndex = 0;
-  let scenarioAnswered = false;
+  let s3Done = false, s4Done = false, s5Done = false;
 
   const quizData = [
     {
-      q: "Where do you send a ping for it to count in analytics?",
-      options: ["Regular chat tab", "Messenger tab", "Pings tab in NebulaX"],
-      correct: 2,
-      feedbackCorrect: "Exactly. Only pings sent through the Pings tab appear in your stats.",
-      feedbackWrong: "Not quite — only the Pings tab counts. Everything else is invisible to analytics."
+      q: "Where do you find the highest-priority clients to ping?",
+      options: ["The All tab — it shows all your past clients", "The Mandatory tab — the system automatically flags clients who are most likely to return", "Your recent chats list in the regular chat view"],
+      correct: 1,
+      feedbackCorrect: "Correct. The Mandatory tab is automatically populated by the system based on session length and user activity. These are your highest-priority clients.",
+      feedbackWrong: "The Mandatory tab is where you start. The system automatically identifies clients who are most likely to return — your job is to reach out to them."
     },
     {
-      q: "You just finished a chat session. How long do you have to send a ping?",
-      options: ["1 hour", "15 minutes", "24 hours"],
-      correct: 2,
-      feedbackCorrect: "Right. 24 hours after a chat — that's your window to reach out while the connection is still warm.",
-      feedbackWrong: "After a chat the window is 24 hours. Use it well."
+      q: "Where must you send a ping for it to count in analytics?",
+      options: ["Through the regular Chats view", "Through the Pings tab in NebulaX", "Through the Messenger tab"],
+      correct: 1,
+      feedbackCorrect: "Exactly. Only pings sent through the Pings tab appear in your analytics. Everything else is invisible to the system.",
+      feedbackWrong: "Only the Pings tab counts. Sending through regular chat — even if the message is perfect — won't appear in your analytics."
     },
     {
-      q: "Your ping isn't landing well. What's most likely the reason?",
-      options: ["You sent it too fast", "It was too short", "It had no personal detail from the session"],
-      correct: 2,
-      feedbackCorrect: "Yes. A ping that could've been sent to anyone doesn't feel like it was sent to them.",
-      feedbackWrong: "Length and timing matter less than personalization. A generic ping won't bring them back."
+      q: "What is the benchmark you need to hit for this metric?",
+      options: ["Ping at least 50% of clients in your Mandatory tab", "Ping at least 85% of clients in your Mandatory tab", "Ping 100% of all past clients every shift"],
+      correct: 1,
+      feedbackCorrect: "Right. The goal is 85%+ of your Mandatory tab covered every shift. Distribute throughout the shift — start, middle, end.",
+      feedbackWrong: "The benchmark is 85%+ of your Mandatory tab. Not all past clients — just the ones the system flagged as high-priority."
     }
   ];
 
-  const scenarioData = [
-    { text: "I'll ping her tomorrow — I still have time", icon: "⚠️", type: "warn",
-      feedback: "You do still have time — but the longer you wait, the colder the connection gets. The best pings go out the same day, while the emotion is fresh." },
-    { text: "Open Pings tab, write a personal ping referencing the date she mentioned, then start my shift", icon: "✅", type: "correct",
-      feedback: "Perfect. You used the window well. She'll get a notification that feels personal — and that's exactly when a ping works." },
-    { text: "Send a quick message through the regular chat tab", icon: "❌", type: "wrong",
-      feedback: "Good instinct — but this won't count in your analytics. Always use the Pings tab, otherwise it's invisible to the system." }
+  const sortFragments = [
+    { id: 1, text: "Reflect the emotion — acknowledge what they're feeling" },
+    { id: 2, text: "Connect to the session — reference something specific they shared" },
+    { id: 3, text: "Create intrigue — hint at a detail or insight they haven't heard yet" },
+    { id: 4, text: "Invite them back — a clear, warm CTA without pressure" }
   ];
 
-  const sortFragments = [
-    { id: 1, text: '"Hi dear,"' },
-    { id: 2, text: '"I can feel how much this situation is weighing on you right now."' },
-    { id: 3, text: '"I keep thinking about what you shared — there\'s something important I noticed."' },
-    { id: 4, text: '"There\'s a specific detail that could really change how you move forward."' },
-    { id: 5, text: '"And I don\'t want you to miss it."' },
-    { id: 6, text: '"When you\'re ready, come back and I\'ll walk you through it."' }
-  ];
+  let sortOrder = [];
 
   function goToScreen(num) {
     const prev = document.getElementById('screen-' + currentScreen);
     prev.classList.remove('screen-visible');
     prev.classList.add('screen-hidden');
-
     currentScreen = num;
     const next = document.getElementById('screen-' + num);
     setTimeout(() => {
@@ -315,19 +380,17 @@
       next.classList.add('screen-visible');
       updateProgress();
       if (num === 2) renderQuiz();
-      if (num === 3) renderScenario();
-      if (num === 4) renderSort();
-      if (num === 6) renderEndScreen();
+      if (num === 6) renderSort();
+      if (num === 8) renderEndScreen();
       lucide.createIcons();
     }, 300);
   }
 
   function updateProgress() {
-    const pct = ((currentScreen - 1) / 5) * 100;
+    const pct = ((currentScreen - 1) / 7) * 100;
     document.getElementById('progress-bar').style.width = pct + '%';
   }
 
-  // QUIZ
   function renderQuiz() {
     const container = document.getElementById('quiz-container');
     if (quizIndex >= quizData.length) {
@@ -337,7 +400,7 @@
             <i data-lucide="check-circle" style="width:32px;height:32px;color:#22c55e;"></i>
           </div>
           <p class="text-lg font-semibold mb-2" style="color:#f1f5f9;">Quiz complete!</p>
-          <p class="text-sm mb-6" style="color:#94a3b8;">Let's move to a real scenario.</p>
+          <p class="text-sm mb-6" style="color:#94a3b8;">Now let's see how this plays out in real situations.</p>
           <button onclick="goToScreen(3)" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background:linear-gradient(135deg,#f97316,#ea580c);">
             Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
           </button>
@@ -347,7 +410,7 @@
     }
     const q = quizData[quizIndex];
     container.innerHTML = `
-      <div class="mb-4 flex items-center gap-2">
+      <div class="mb-4">
         <span class="text-xs font-semibold px-2 py-1 rounded" style="background:rgba(255,255,255,0.06);color:#94a3b8;">Question ${quizIndex+1} of ${quizData.length}</span>
       </div>
       <p class="text-lg font-semibold mb-5" style="color:#f1f5f9;">${q.q}</p>
@@ -359,27 +422,18 @@
           </button>
         `).join('')}
       </div>
-      <div id="quiz-feedback" class="hidden mt-4"></div>
-    `;
+      <div id="quiz-feedback" class="hidden mt-4"></div>`;
   }
 
   function answerQuiz(idx) {
     const q = quizData[quizIndex];
     const correct = idx === q.correct;
     if (correct) score++;
-
-    const btns = document.querySelectorAll('#quiz-options .option-btn');
-    btns.forEach((b, i) => {
+    document.querySelectorAll('#quiz-options .option-btn').forEach((b, i) => {
       b.classList.add('disabled');
-      if (i === q.correct) {
-        b.style.borderColor = '#22c55e';
-        b.style.background = 'rgba(34,197,94,0.1)';
-      } else if (i === idx && !correct) {
-        b.style.borderColor = '#ef4444';
-        b.style.background = 'rgba(239,68,68,0.1)';
-      }
+      if (i === q.correct) { b.style.borderColor='#22c55e'; b.style.background='rgba(34,197,94,0.1)'; }
+      else if (i === idx && !correct) { b.style.borderColor='#ef4444'; b.style.background='rgba(239,68,68,0.1)'; }
     });
-
     const fb = document.getElementById('quiz-feedback');
     fb.classList.remove('hidden');
     fb.innerHTML = `
@@ -387,62 +441,85 @@
         <span class="text-lg">${correct?'✅':'❌'}</span>
         <p class="text-sm" style="color:#e2e8f0;">${correct?q.feedbackCorrect:q.feedbackWrong}</p>
       </div>
-      <div class="text-center mt-3">
-        <button onclick="nextQuiz()" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background: linear-gradient(135deg, #6378FD, #5169e8);">
+      <div class="text-center">
+        <button onclick="nextQuiz()" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all hover:scale-105" style="background:linear-gradient(135deg,#6378FD,#5169e8);">
           Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
         </button>
       </div>`;
     lucide.createIcons();
   }
 
-  function nextQuiz() {
-    quizIndex++;
-    renderQuiz();
-    lucide.createIcons();
-  }
+  function nextQuiz() { quizIndex++; renderQuiz(); lucide.createIcons(); }
 
-  // SCENARIO
-  function renderScenario() {
-    if (scenarioAnswered) return;
-    const container = document.getElementById('scenario-options');
-    container.innerHTML = scenarioData.map((o, i) => `
-      <button onclick="answerScenario(${i})" class="option-btn w-full text-left px-5 py-4 rounded-xl flex items-start gap-3" style="background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);color:#e2e8f0;">
-        <span class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style="background:rgba(255,255,255,0.06);color:#94a3b8;">${String.fromCharCode(65+i)}</span>
-        <span class="text-sm">${o.text}</span>
-      </button>
-    `).join('');
-  }
-
-  function answerScenario(idx) {
-    scenarioAnswered = true;
-    const o = scenarioData[idx];
-    if (o.type === 'correct') score++;
-
-    const btns = document.querySelectorAll('#scenario-options .option-btn');
-    btns.forEach((b, i) => {
+  function answerS3(idx) {
+    if (s3Done) return;
+    s3Done = true;
+    const correct = idx === 1;
+    if (correct) score++;
+    document.querySelectorAll('#s3-options .option-btn').forEach((b, i) => {
       b.classList.add('disabled');
-      const t = scenarioData[i].type;
-      if (t === 'correct') { b.style.borderColor='#22c55e'; b.style.background='rgba(34,197,94,0.1)'; }
-      else if (i === idx) {
-        b.style.borderColor = t==='warn'?'#eab308':'#ef4444';
-        b.style.background = t==='warn'?'rgba(234,179,8,0.1)':'rgba(239,68,68,0.1)';
-      }
+      if (i === 1) { b.style.borderColor='#22c55e'; b.style.background='rgba(34,197,94,0.1)'; }
+      else if (i === idx && !correct) { b.style.borderColor='#ef4444'; b.style.background='rgba(239,68,68,0.1)'; }
     });
-
-    const fb = document.getElementById('scenario-feedback');
+    const feedbacks = [
+      "Live chats matter — but Mandatory clients are already waiting from yesterday. The system flagged them as high-priority for a reason. Start your shift with Mandatory, then handle the live request.",
+      "Yes! Mandatory tab first, always. These clients had sessions with you already — they're warm, they're flagged, and the window to re-engage is open. Work through the list before anything else.",
+      "The All tab clients can wait a bit longer. Mandatory is where the system tells you to focus first — those 12 clients from yesterday's sessions are your highest priority right now."
+    ];
+    const fb = document.getElementById('s3-feedback');
     fb.classList.remove('hidden');
-    const colors = { correct:['rgba(34,197,94,0.1)','rgba(34,197,94,0.3)'], warn:['rgba(234,179,8,0.1)','rgba(234,179,8,0.3)'], wrong:['rgba(239,68,68,0.1)','rgba(239,68,68,0.3)'] };
-    fb.innerHTML = `
-      <div class="toast-msg rounded-xl p-4 flex items-start gap-3" style="background:${colors[o.type][0]};border:1px solid ${colors[o.type][1]};">
-        <span class="text-lg">${o.icon}</span>
-        <p class="text-sm" style="color:#e2e8f0;">${o.feedback}</p>
-      </div>`;
-    document.getElementById('scenario-next').classList.remove('hidden');
+    fb.innerHTML = `<div class="toast-msg rounded-xl p-4 flex items-start gap-3" style="background:${correct?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)'};border:1px solid ${correct?'rgba(34,197,94,0.3)':'rgba(239,68,68,0.3)'};">
+      <span class="text-lg">${correct?'✅':'❌'}</span><p class="text-sm" style="color:#e2e8f0;">${feedbacks[idx]}</p></div>`;
+    document.getElementById('s3-next').classList.remove('hidden');
     lucide.createIcons();
   }
 
-  // SORT
-  let sortOrder = [];
+  function answerS4(idx) {
+    if (s4Done) return;
+    s4Done = true;
+    const correct = idx === 1;
+    if (correct) score++;
+    document.querySelectorAll('#s4-options .option-btn').forEach((b, i) => {
+      b.classList.add('disabled');
+      if (i === 1) { b.style.borderColor='#22c55e'; b.style.background='rgba(34,197,94,0.1)'; }
+      else if (i === idx && !correct) { b.style.borderColor='#ef4444'; b.style.background='rgba(239,68,68,0.1)'; }
+    });
+    const feedbacks = [
+      "The quality of the message wasn't the issue — it was where it was sent. Even the most personal, well-crafted message won't count if it goes through the regular chat view.",
+      "Exactly. The Pings tab is the only channel the system tracks. Sending through regular chat — no matter how good the message — is invisible to analytics. Always use the Pings tab.",
+      "The client being in Mandatory isn't what determines tracking. What matters is where the message is sent from. Only the Pings tab counts — regardless of which tab the client appears in."
+    ];
+    const fb = document.getElementById('s4-feedback');
+    fb.classList.remove('hidden');
+    fb.innerHTML = `<div class="toast-msg rounded-xl p-4 flex items-start gap-3" style="background:${correct?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)'};border:1px solid ${correct?'rgba(34,197,94,0.3)':'rgba(239,68,68,0.3)'};">
+      <span class="text-lg">${correct?'✅':'❌'}</span><p class="text-sm" style="color:#e2e8f0;">${feedbacks[idx]}</p></div>`;
+    document.getElementById('s4-next').classList.remove('hidden');
+    lucide.createIcons();
+  }
+
+  function answerS5(idx) {
+    if (s5Done) return;
+    s5Done = true;
+    const correct = idx === 1;
+    if (correct) score++;
+    document.querySelectorAll('#s5-options .option-btn').forEach((b, i) => {
+      b.classList.add('disabled');
+      if (i === 1) { b.style.borderColor='#22c55e'; b.style.background='rgba(34,197,94,0.1)'; }
+      else if (i === idx && !correct) { b.style.borderColor='#ef4444'; b.style.background='rgba(239,68,68,0.1)'; }
+    });
+    const feedbacks = [
+      "Option A is warm but generic — 'hope you're doing well' could be sent to anyone. It doesn't reference anything specific from the session, which means the client has no real reason to return.",
+      "Yes! Option B does everything right — it reflects the emotion, connects to something specific from the session, creates intrigue with a detail they haven't heard yet, and ends with a clear invitation. That's the structure that brings people back.",
+      "Option C is polite but passive. It puts the responsibility on the client to decide if they want to continue — and gives them no compelling reason to do so. A ping should give them a reason to come back, not just an open door."
+    ];
+    const fb = document.getElementById('s5-feedback');
+    fb.classList.remove('hidden');
+    fb.innerHTML = `<div class="toast-msg rounded-xl p-4 flex items-start gap-3" style="background:${correct?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)'};border:1px solid ${correct?'rgba(34,197,94,0.3)':'rgba(239,68,68,0.3)'};">
+      <span class="text-lg">${correct?'✅':'❌'}</span><p class="text-sm" style="color:#e2e8f0;">${feedbacks[idx]}</p></div>`;
+    document.getElementById('s5-next').classList.remove('hidden');
+    lucide.createIcons();
+  }
+
   function renderSort() {
     sortOrder = [...sortFragments].sort(() => Math.random() - 0.5);
     renderSortItems();
@@ -455,63 +532,38 @@
            data-idx="${i}" style="background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08);">
         <span class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style="background:rgba(249,115,22,0.15);color:#f97316;">${i+1}</span>
         <span class="text-sm" style="color:#e2e8f0;">${f.text}</span>
-      </div>
-    `).join('');
+      </div>`).join('');
 
     const items = container.querySelectorAll('.drag-item');
     let dragIdx = null;
-
     items.forEach(item => {
-      item.addEventListener('dragstart', e => {
-        dragIdx = +item.dataset.idx;
-        item.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-      });
-      item.addEventListener('dragend', () => {
-        item.classList.remove('dragging');
-        container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-      });
-      item.addEventListener('dragover', e => {
-        e.preventDefault();
-        item.classList.add('drag-over');
-      });
+      item.addEventListener('dragstart', e => { dragIdx = +item.dataset.idx; item.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+      item.addEventListener('dragend', () => { item.classList.remove('dragging'); container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); });
+      item.addEventListener('dragover', e => { e.preventDefault(); item.classList.add('drag-over'); });
       item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
       item.addEventListener('drop', e => {
-        e.preventDefault();
-        item.classList.remove('drag-over');
+        e.preventDefault(); item.classList.remove('drag-over');
         const dropIdx = +item.dataset.idx;
         if (dragIdx !== null && dragIdx !== dropIdx) {
-          const temp = sortOrder[dragIdx];
-          sortOrder.splice(dragIdx, 1);
-          sortOrder.splice(dropIdx, 0, temp);
-          renderSortItems();
+          const temp = sortOrder[dragIdx]; sortOrder.splice(dragIdx, 1); sortOrder.splice(dropIdx, 0, temp); renderSortItems();
         }
       });
-
       let touchIdx = null;
-      item.addEventListener('touchstart', e => {
-        touchIdx = +item.dataset.idx;
-        item.classList.add('dragging');
-      }, { passive: true });
+      item.addEventListener('touchstart', e => { touchIdx = +item.dataset.idx; item.classList.add('dragging'); }, { passive: true });
       item.addEventListener('touchmove', e => {
         e.preventDefault();
-        const touch = e.touches[0];
-        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        const touch = e.touches[0]; const el = document.elementFromPoint(touch.clientX, touch.clientY);
         container.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
         if (el && el.closest('.drag-item')) el.closest('.drag-item').classList.add('drag-over');
       }, { passive: false });
       item.addEventListener('touchend', e => {
         item.classList.remove('dragging');
-        const touch = e.changedTouches[0];
-        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        const touch = e.changedTouches[0]; const el = document.elementFromPoint(touch.clientX, touch.clientY);
         container.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
         if (el && el.closest('.drag-item')) {
           const dropIdx = +el.closest('.drag-item').dataset.idx;
           if (touchIdx !== null && touchIdx !== dropIdx) {
-            const temp = sortOrder[touchIdx];
-            sortOrder.splice(touchIdx, 1);
-            sortOrder.splice(dropIdx, 0, temp);
-            renderSortItems();
+            const temp = sortOrder[touchIdx]; sortOrder.splice(touchIdx, 1); sortOrder.splice(dropIdx, 0, temp); renderSortItems();
           }
         }
       });
@@ -522,16 +574,15 @@
     const correct = sortOrder.every((f, i) => f.id === i + 1);
     const fb = document.getElementById('sort-feedback');
     fb.classList.remove('hidden');
-
     if (correct) {
       score++;
       fb.innerHTML = `<div class="toast-msg rounded-xl p-4 flex items-start gap-3" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);">
-        <span class="text-lg">✅</span><p class="text-sm" style="color:#e2e8f0;">Perfect order! That's exactly how a strong ping flows — emotion, intrigue, invitation.</p></div>`;
+        <span class="text-lg">✅</span><p class="text-sm" style="color:#e2e8f0;">Perfect! Emotion → Session detail → Intrigue → Invitation. That's the structure that brings clients back.</p></div>`;
       document.getElementById('check-sort-btn').classList.add('hidden');
       document.getElementById('sort-next-btn').classList.remove('hidden');
     } else {
       fb.innerHTML = `<div class="toast-msg rounded-xl p-4 flex items-start gap-3" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);">
-        <span class="text-lg">🔄</span><p class="text-sm" style="color:#e2e8f0;">Not quite — try again. Remember: start with emotion, build intrigue, then invite them back.</p></div>`;
+        <span class="text-lg">🔄</span><p class="text-sm" style="color:#e2e8f0;">Not quite — try again. Think about what the client needs to feel first before you create curiosity.</p></div>`;
     }
     lucide.createIcons();
   }
@@ -540,18 +591,13 @@
     const pct = Math.round((score / totalPossible) * 100);
     const display = document.getElementById('score-display');
     let emoji = pct >= 80 ? '🌟' : pct >= 60 ? '👍' : '💪';
-    let msg = pct >= 80 ? "Outstanding! You've nailed the ping strategy." : pct >= 60 ? "Good job! A few areas to sharpen." : "Keep practicing — you'll get there!";
-
-    display.innerHTML = `
-      <div class="text-5xl mb-3">${emoji}</div>
-      <p class="text-4xl font-bold font-display mb-1" style="color:#f97316;">${score}/${totalPossible}</p>
-      <p class="text-sm" style="color:#94a3b8;">${msg}</p>
-    `;
+    let msg = pct >= 80 ? "Outstanding! You've got the Mandatory tab system down." : pct >= 60 ? "Good work! A few things to sharpen." : "Keep practicing — the system will click.";
+    display.innerHTML = `<div class="text-5xl mb-3">${emoji}</div><p class="text-4xl font-bold font-display mb-1" style="color:#f97316;">${score}/${totalPossible}</p><p class="text-sm" style="color:#94a3b8;">${msg}</p>`;
 
     const confetti = document.getElementById('confetti');
     confetti.innerHTML = '';
     if (pct >= 60) {
-      const colors = ['#f97316','#22c55e','#3b82f6','#eab308','#ec4899'];
+      const colors = ['#f97316','#22c55e','#6378FD','#fbbf24','#ec4899'];
       for (let i = 0; i < 40; i++) {
         const piece = document.createElement('div');
         piece.className = 'confetti-piece';
@@ -563,10 +609,9 @@
   }
 
   function restartTraining() {
-    score = 0; quizIndex = 0; scenarioAnswered = false;
-    document.getElementById('scenario-feedback').classList.add('hidden');
-    document.getElementById('scenario-next').classList.add('hidden');
-    document.getElementById('sort-feedback').classList.add('hidden');
+    score = 0; quizIndex = 0; s3Done = false; s4Done = false; s5Done = false;
+    ['s3-feedback','s4-feedback','s5-feedback','sort-feedback'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    ['s3-next','s4-next','s5-next'].forEach(id => document.getElementById(id).classList.add('hidden'));
     document.getElementById('check-sort-btn').classList.remove('hidden');
     document.getElementById('sort-next-btn').classList.add('hidden');
     goToScreen(1);
@@ -575,5 +620,5 @@
   lucide.createIcons();
   updateProgress();
 </script>
- </body>
+</body>
 </html>
